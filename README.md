@@ -1,10 +1,33 @@
-This is a [Next.js](https://nextjs.org) + [wagmi](https://wagmi.sh) project bootstrapped with [`create-wagmi`](https://github.com/wagmi-dev/wagmi/tree/main/packages/create-wagmi)
+# Folio_Tracking
 
-# Getting Started
+The aim is to track crypto positions on dex and cex
 
-Run `npm run dev` in your terminal, and then open [localhost:3000](http://localhost:3000) in your browser.
+## Installation
 
-Once the webpage has loaded, changes made to files inside the `src/` directory (e.g. `src/pages/index.tsx`) will automatically update the webpage.
+#### Create the project with WAGMI
+- npm init wagmi
+  - Framework : Next.js
+  - Template : RainbowKit (For connection button)
+  - Provider : Infura
+  - Create an WalletConnect ID: https://cloud.walletconnect.com/sign-in
+    - Create a Project and give the Project ID
+  - cd next-rainbowkit
+  - npm run dev
+  - Add an alchemyProvider, infuraProvider, or alike to src/wagmi.ts before deploying your project to production to 
+    prevent being rate-limited.
++ Tailwind: (https://tailwindcss.com/docs/guides/nextjs)
+ - npm install -D tailwindcss postcss autoprefixer
+ - npx tailwindcss init -p
+ - Update Globals.css
+ - Update tailwind.config.js 
+
+#### Create the project with NEXT
+- npx create-next-app@latest myproject
+- And import the rest:
+    - npm i wagmi viem
+
+#### Quick setup
+- npm init wagmi
 
 # Learn more
 

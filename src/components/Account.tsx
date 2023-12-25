@@ -7,8 +7,8 @@ export function Account() {
   const { data: ensName } = useEnsName({ address })
 
   return (
-    <div>
-      {ensName ?? address}
+    <div className="text-center p-4 text-lg">
+      <span>{ensName ?? address}</span>
       {ensName ? ` (${address})` : null}
     </div>
   )

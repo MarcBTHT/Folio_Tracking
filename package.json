@@ -9,7 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "encoding": "^0.1.13",
     "next": "^13.4.0",
+    "pino-pretty": "^10.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "viem": "~0.3.36",
@@ -19,8 +21,11 @@
     "@types/node": "^17.0.31",
     "@types/react": "^18.0.9",
     "@types/react-dom": "^18.0.3",
+    "autoprefixer": "^10.4.16",
     "eslint": "^8.15.0",
     "eslint-config-next": "^12.1.6",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.4.0",
     "typescript": "^5.0.4"
   }
 }

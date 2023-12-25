@@ -1,0 +1,5 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**Je dois ajouter un import dans un index.css ou un truc superieur pour que ca marche mais j'en ai pas */

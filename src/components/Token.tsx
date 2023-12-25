@@ -10,23 +10,31 @@ export function Token() {
   const { data, error, isError, isLoading, refetch } = useToken({ address })
 
   return (
-    <>
-      <div>
+    <div className="text-center my-4">
+      <div className="flex justify-center items-center space-x-2">
         <input
           onChange={(e) => setAddress(e.target.value as Address)}
           placeholder="token address"
           value={address}
+          className="py-1 px-2 rounded border-2 border-customPink focus:border-customRed outline-none transition-all"
         />
-        <button onClick={() => refetch()}>fetch</button>
+        <button 
+          onClick={() => refetch()}
+          className="bg-customPink hover:bg-customRed text-white font-bold py-1 px-2 rounded transition-all disabled:opacity-50"
+          disabled={isLoading}
+        >
+          fetch
+        </button>
       </div>
 
       {data && (
-        <div>
-          {data.totalSupply?.formatted} {data.symbol}
+        <div className="mt-2">
+          <span className="font-bold">{data.totalSupply?.formatted}</span> <span className="font-bold text-customPink">{data.symbol}</span>
         </div>
       )}
       {isLoading && <div>Fetching token...</div>}
-      {isError && <div>Error: {error?.message}</div>}
-    </>
+      {isError && <div className="text-red-500">Error: {error?.message}</div>}
+    </div>
   )
 }
+
