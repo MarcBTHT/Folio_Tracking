@@ -1,0 +1,94 @@
+# Get all the token on a wallet:
+
+## Possibility 1:
+- With wagmi useBalance:
+/**
+export function AccountBalance() {
+    const { address } = useAccount()
+    const { data, refetch } = useBalance({
+      address,
+      watch: true,
+      token: '0x88541670E55cC00bEEFD87eB59EDd1b7C511AC9a', //Sepolia Aave
+    })
+  
+    return (
+      <div>
+        <span className='mr-2'>{data?.formatted}</span>
+    )
+}
+*/
+	- Details: https://wagmi.sh/react/hooks/useBalance
+	- Without 'token:' it take be default the token of the chain
+	- Return Value {data?: { decimals: number 
+				formatted: string
+    				symbol: string
+    				value: bigint
+ 				 }
+	  We have the possibility to have the formatted Bigint directly not possible with useContractRead (SEE HOW THEY DO THAT)
+- But if we want to do that we need to loop and call useBalance a lot of time with Possibility2 it just 1 time !!
+
+
+## Possibility 2:
+- With wagmi useContractRead
+/**
+import { useContractReads } from 'wagmi'
+import {erc20ABIperso } from './constants';
+
+export function GetAccountBalance() {
+    const { address } = useAccount()
+    if (!address) {
+        // Handle the case when the address is not available
+        return <div>No account connected</div>;
+    }
+
+    const { data, error, isLoading } = useContractReads({
+        contracts: [
+            {
+                address: '0x779877A7B0D9E8603169DdbD7836e478b4624789',
+                abi: erc20ABIperso,
+                functionName: 'balanceOf',
+                args: [address],
+            },
+            {
+                address: '0x88541670E55cC00bEEFD87eB59EDd1b7C511AC9a',
+                abi: erc20ABIperso,
+                functionName: 'balanceOf',
+                args: [address],
+            },
+        ],
+    })
+    if (error) return <div>Error fetching balances</div>;
+    if (isLoading) return <div>Loading balances...</div>;
+    console.log(data);
+    /// POUR AVOIR TOUTES LES DECIMALES DU TOKEN ... ///
+    const formattedBalances = data?.map((item, index) => {
+        if (!item || !item.result) return '0';
+
+        const rawBalance = item.result.toString();
+        const decimals = 18; // Adjust based on each token's decimals
+        let balance = '0';
+        const balanceLength = rawBalance.length;
+
+        if (balanceLength > decimals) {
+            balance = rawBalance.slice(0, -decimals) + '.' + rawBalance.slice(-decimals);
+        } else {
+            balance = '0.' + rawBalance.padStart(decimals, '0');
+        }
+
+        return balance;
+    });
+
+    return (
+        <div>
+            {formattedBalances && formattedBalances.map((balance, index) => (
+                <p key={index}>Balance of token at address: {balance}</p>
+            ))}
+        </div>
+    );
+}
+*/
+	- More details : https://wagmi.sh/react/hooks/useContractReads
+	- First problem the ABI need to be inline or with '] as const;' at the end because typescript et JSON ... (as const = immutable ...)
+	- But with this I don't have the formatted value so I convert the big number into the formatted ...
+	- And I map this formatted value to have all the token.
+	- So first I need to have a list of all the contract to have all the token. (Sur mainnet plus facile a trouver et meme ABI pour les ERC20 ...)

@@ -1,13 +1,24 @@
 import Link from 'next/link';
+import { Dashboard1 } from './components/dashboard'
+import { Connect } from '../../components/Connect'
+import { Connected } from '../../components/Connected'
+
 
 export default function Dashboard() {
   return (
-      <div className="min-h-screen mx-auto bg-customLightOrange">
-        <h1 className="text-3xl font-bold underline text-customRed p-4 flex justify-center">About Us</h1>
-        <p className="text-center my-4">Some information about us...</p>
+    <div className="mx-auto">
+      <h1 className="text-3xl font-bold underline text-customRed p-4 flex justify-center">Dashboard</h1>
+      <Connect />
+      <Connected>
+        <hr className="my-4 border-customRed" />
+        <h2 className="flex justify-center text-xl font-bold my-2 text-customRed" >Network</h2>
+        <Dashboard1 />
+      </Connected>
+      <nav className="flex justify-center p-4">
         <Link href="/" className="text-center underline">
           Back to Home
         </Link>
-      </div>
+      </nav>
+    </div >
   );
 }

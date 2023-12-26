@@ -2,6 +2,35 @@
 
 The aim is to track crypto positions on dex and cex
 
+## RoadMap
+
+### 1. Wallet Integration
+   - [x] Connect to MetaMask and other wallets.
+   - [x] Retrieve tokens and balances for the connected chain.
+     - [x] Display all tokens in connected chain
+       - [x] Testnet: Need to define contract address for each token
+       - [ ] Convert bigInt to formatted number (I did it for 18 decimal, I need to add the decimal in tokenMapping) 
+       - [ ] Mainnet : Need to retrieve all erc20 token addresses in ETH and other chains + Token addresses in other chains like bsc, xrp ...
+   - [ ] Extend functionality to fetch tokens from multiple chains.
+   - [ ] Retrieve the moment they put the token on the wallet and get the price at that moment.
+   - [ ] Calculate ROI based on historical and current prices.
+   
+### 2. Crypto Exchange (CEX) Token Integration
+   - [ ] Establish connection with CEX APIs. (Binance)
+   - [ ] Retrieve and list available tokens from CEX on our front-end.
+   - [ ] Fetch historical purchase prices for tokens.
+   - [ ] Calculate ROI based on historical and current prices.
+
+## 3. Dashboard Development
+   - [ ] Design and implement the dashboard interface.
+   - [ ] Display tokens and balances from CEX and wallets.
+
+## 4. Data Visualization
+   - [ ] Implement charts and graphs for price trends.
+   - [ ] Create ROI visualizations per token.
+   - [ ] Develop a consolidated view of investment performance.
+
+
 ## Installation
 
 #### Create the project with WAGMI
