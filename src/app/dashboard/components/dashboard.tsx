@@ -1,16 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { useAccount, useBalance, useContractReads, useNetwork, useSwitchNetwork } from 'wagmi'
+import { useAccount, useBalance, useContractReads, useNetwork } from 'wagmi'
 import { erc20ABIperso } from './constants';
 
 export function Dashboard1() {
     return (
         <>
-            <div className="text-center my-4">
-                <NetworkSwitcher />
-            </div>
-            <br />
             <div className='text-center'>
                 <GetAccountBalance />
             </div>
@@ -24,7 +20,7 @@ export function GetAccountBalance() {
         // Handle the case when the address is not available
         return <div>No account connected</div>;
     }
-   //To associate the name with the contract address (I also need to add the decimals and modify the mapping logic below)
+    //To associate the name with the contract address (I also need to add the decimals and modify the mapping logic below)
     const tokenMapping: { [key: string]: string } = {
         '0x779877A7B0D9E8603169DdbD7836e478b4624789': 'Link',
         '0x88541670E55cC00bEEFD87eB59EDd1b7C511AC9a': 'Aave',
@@ -130,7 +126,7 @@ export function GetChainBalance() { //I can put this function in GetAccountBalan
             <td className="py-4">
                 <div className="flex items-center">
                     {/* Replace `placeholder-icon.svg` with your actual icon paths */}
-                    <img className="h-6 w-6 rounded-full mr-2" src={getTokenIconPath(chain?.name)} alt={chain?.name} />
+                    <img className="h-6 w-6 rounded-full mr-2" src={getTokenIconPath(chain?.name || '')} alt={chain?.name || 'Default Chain'} />
                     <span>{chain?.name}</span>
                 </div>
             </td>
@@ -138,38 +134,6 @@ export function GetChainBalance() { //I can put this function in GetAccountBalan
         </>
     )
 }
-
-export function NetworkSwitcher() {
-    const { chain } = useNetwork()
-    const { chains, error, isLoading, pendingChainId, switchNetwork } =
-      useSwitchNetwork()
-  
-    return (
-      <div className="text-center my-4">
-        <div className="text-lg">
-          Connected to {chain?.name ?? chain?.id}
-          {chain?.unsupported && ' (unsupported)'}
-        </div>
-        <br />
-        {switchNetwork && (
-          <div>
-            <span className="font-medium text-customRed">Switch to:{' '}</span>
-            {chains.map((x) =>
-              x.id === chain?.id ? null : (
-                <button key={x.id} onClick={() => switchNetwork(x.id)}
-                className={`bg-customPink hover:bg-customRed text-white font-bold py-2 px-4 rounded ${isLoading && x.id === pendingChainId ? "opacity-50" : ""}`}>
-                  {x.name}
-                  {isLoading && x.id === pendingChainId && ' (switching)'}
-                </button>
-              ),
-            )}
-          </div>
-        )}
-  
-        <div>{error?.message}</div>
-      </div>
-    )
-  }
 
 function getTokenIconPath(tokenName: string): string {
     const tokenIconMapping: { [key: string]: string } = {

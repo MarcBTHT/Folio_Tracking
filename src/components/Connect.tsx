@@ -15,7 +15,7 @@ export function Connect() {
         {isConnected && (
           <button
             onClick={() => disconnect()}
-            className="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded"
+            className="bg-customOrange hover:bg-customPink text-white font-bold py-2 px-4 rounded"
           >
             Disconnect from {connector?.name}
           </button>

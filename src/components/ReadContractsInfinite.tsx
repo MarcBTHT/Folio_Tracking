@@ -33,7 +33,7 @@ export function ReadContractsInfinite() {
               ))}
             </div>
           ))}
-          <button className={`bg-customPink hover:bg-customRed text-white font-bold py-2 px-4 rounded ${isLoading && x.id === pendingChainId ? "opacity-50" : ""}`} onClick={() => fetchNextPage()}>Fetch more</button>
+          <button className={`bg-customPink hover:bg-customRed text-white font-bold py-2 px-4 rounded ${isLoading ? "opacity-50" : ""}`} onClick={() => fetchNextPage()}>Fetch more</button>
         </>
       )}
     </div>
