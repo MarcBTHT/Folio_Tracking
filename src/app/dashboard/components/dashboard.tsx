@@ -24,6 +24,7 @@ export function GetAccountBalance() {
     const tokenMapping: { [key: string]: string } = {
         '0x779877A7B0D9E8603169DdbD7836e478b4624789': 'Link',
         '0x88541670E55cC00bEEFD87eB59EDd1b7C511AC9a': 'Aave',
+        '0x6397de0F9aEDc0F7A8Fa8B438DDE883B9c201010': 'SinCity',
         // ... other token mappings
         //If I want to import UDSC or other with different decimals, I have to change the decimals in the code below, so I need to find a way (In ERC30 I have a function to know the decimals of the token)
     };
@@ -31,13 +32,20 @@ export function GetAccountBalance() {
     const contracts = [
         //////////////////// SEPOLIA ////////////////////
         {
-            address: '0x779877A7B0D9E8603169DdbD7836e478b4624789',
+            address: '0x779877A7B0D9E8603169DdbD7836e478b4624789', //Link
             abi: erc20ABIperso,
             functionName: 'balanceOf',
             args: [address],
         },
         {
-            address: '0x88541670E55cC00bEEFD87eB59EDd1b7C511AC9a',
+            address: '0x88541670E55cC00bEEFD87eB59EDd1b7C511AC9a', //AAVE
+            abi: erc20ABIperso,
+            functionName: 'balanceOf',
+            args: [address],
+        },
+        //////////////////// BNB ////////////////////
+        {
+            address: '0x6397de0F9aEDc0F7A8Fa8B438DDE883B9c201010', //SIN
             abi: erc20ABIperso,
             functionName: 'balanceOf',
             args: [address],
@@ -141,6 +149,8 @@ function getTokenIconPath(tokenName: string): string {
         'Link': "/images/Chainlink_Logo.png",
         'Aave': "/images/aave-aave-logo.png",
         'Avalanche Fuji': "/images/Avalanche_AVAX_Logo.png",
+        'SinCity': "/images/SinCity_Logo.png",
+        'BNB Smart Chain': "/images/bnb-bnb-logo.png",
         // ... other token mappings
     };
     return tokenIconMapping[tokenName] || '../assets/default-icon.svg'; // Fallback to a default icon
