@@ -31,50 +31,83 @@ interface TokenInfo {
 }
 
 export function GetAccountBalance() {
-    const { address } = useAccount();
+    const { address: connectedAddress } = useAccount();
+    const [inputAddress, setInputAddress] = useState('');
     const [tokenInfo, setTokenInfo] = useState<TokenInfo>({});
     const [isSyncing, setIsSyncing] = useState(false);
 
-    useEffect(() => {
-        async function fetchBalances() {
-            if (address) {
-                const newTokenInfo: TokenInfo = {};
+    const fetchBalances = async (address?: `0x${string}`) => {
+        if (address) {
+            const newTokenInfo: TokenInfo = {};
 
-                for (const token of tokenList.tokens) {
-                    try {
-                        const data = await config.publicClient.readContract({
-                            address: token.address,
-                            abi: erc20ABIperso,
-                            functionName: 'balanceOf',
-                            args: [address]
-                        });
+            for (const token of tokenList.tokens) {
+                try {
+                    const data = await config.publicClient.readContract({
+                        address: token.address,
+                        abi: erc20ABIperso,
+                        functionName: 'balanceOf',
+                        args: [address]
+                    });
 
-                        const balance = data && formatUnits(data, token.decimals);
-                        
-                        if (balance && balance != '0') {
-                            newTokenInfo[token.address] = {
-                                name: token.name,
-                                symbol: token.symbol,
-                                decimals: token.decimals,
-                                logoURI: token.logoURI,
-                                balance: balance || '0'
-                            };
-                        }
-                    } catch (error) { }
-                }
-                setTokenInfo(newTokenInfo);
-                setIsSyncing(false);
+                    const balance = data && formatUnits(data, token.decimals);
+                    
+                    if (balance && balance != '0') {
+                        newTokenInfo[token.address] = {
+                            name: token.name,
+                            symbol: token.symbol,
+                            decimals: token.decimals,
+                            logoURI: token.logoURI,
+                            balance: balance || '0'
+                        };
+                    }
+                } catch (error) { }
             }
+            setTokenInfo(newTokenInfo);
+            setIsSyncing(false);
         }
-        fetchBalances();
-    }, [address, isSyncing]);
+    }
+
+    useEffect(() => {
+        fetchBalances(connectedAddress);
+    }, [connectedAddress]);
 
     const handleSyncClick = () => {
-        setIsSyncing(true); 
+        setIsSyncing(true);
+        if (connectedAddress) {
+            fetchBalances(connectedAddress);
+        } else {
+            console.error("Aucun portefeuille connecté");
+        }
+    }
+    
+    const handleAddressChange = (event: React.ChangeEvent<HTMLInputElement>)  => {
+        setInputAddress(event.target.value);
+    };
+
+    const handleFetchBalances = () => {
+        if (inputAddress) {
+            fetchBalances(inputAddress as `0x${string}`);
+        }
     };
 
     return (
         <div className="mt-4 mx-auto w-3/4 bg-white shadow-lg rounded-lg p-6">
+            <div className="mb-4">
+                <input
+                    type="text"
+                    value={inputAddress}
+                    onChange={handleAddressChange}
+                    className="mr-2 p-2 border border-gray-300 rounded"
+                    placeholder="Enter Ethereum Address"
+                />
+                <button
+                    onClick={handleFetchBalances}
+                    disabled={isSyncing}
+                    className="bg-customOrange hover:bg-customPink text-white font-bold py-2 px-4 rounded"
+                >
+                    Fetch Balances
+                </button>
+            </div>
             <button onClick={handleSyncClick} disabled={isSyncing} className="bg-customOrange hover:bg-customPink text-white font-bold py-2 px-4 rounded mb-4">
                 {isSyncing ? 'Synchronisation en cours...' : 'Synchroniser'}
             </button>
