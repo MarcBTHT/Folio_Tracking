@@ -9,11 +9,13 @@ The aim is to track crypto positions on dex and cex
    - [x] Retrieve tokens and balances for the connected chain.
      - [x] Display all tokens in connected chain
        - [x] Testnet: Need to define contract address for each token
-       - [ ] Convert bigInt to formatted number (I did it for 18 decimal, I need to add the decimal in tokenMapping) 
-       - [ ] Mainnet : Need to retrieve all erc20 token addresses in ETH and other chains + Token addresses in other chains like bsc, xrp ...
+       - [x] Convert bigInt to formatted number (formatUnits) 
+       - [x] Have Token List : https://tokenlists.org/
+     - [x] Displays all tokens of a wallet from its address
    - [ ] Extend functionality to fetch tokens from multiple chains.
    - [ ] Retrieve the moment they put the token on the wallet and get the price at that moment.
    - [ ] Calculate ROI based on historical and current prices.
+   - [ ] A way to keep track of all connected wallets (Create an account)
    
 ### 2. Crypto Exchange (CEX) Token Integration
    - [ ] Establish connection with CEX APIs. (Binance)
