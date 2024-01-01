@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAccount, useBalance, useContractReads, useNetwork } from 'wagmi'
 import { erc20ABIperso } from './constants';
 import { formatUnits } from 'viem'
+
+import tokenList from './tokenList.json';
 
 export function Dashboard() {
     return (
@@ -15,69 +17,82 @@ export function Dashboard() {
     )
 }
 
-export function GetAccountBalance() {
-    const { address } = useAccount()
-    if (!address) {
-        // Handle the case when the address is not available
-        return <div>No account connected</div>;
-    }
-    //To associate the name with the contract address (I also need to add the decimals and modify the mapping logic below)
-    const tokenMapping: { [key: string]: string } = {
-        '0x779877A7B0D9E8603169DdbD7836e478b4624789': 'Link',
-        '0x88541670E55cC00bEEFD87eB59EDd1b7C511AC9a': 'Aave',
-        '0x6397de0F9aEDc0F7A8Fa8B438DDE883B9c201010': 'SinCity',
-        // ... other token mappings
-        //If I want to import UDSC or other with different decimals, I have to change the decimals in the code below, so I need to find a way (In ERC30 I have a function to know the decimals of the token)
-    };
+interface Token {
+    address: string;
+    name: string;
+    symbol: string;
+    decimals: number;
+    logoURI: string;
+}
 
-    const contracts = [
-        //////////////////// SEPOLIA ////////////////////
-        {
-            address: '0x779877A7B0D9E8603169DdbD7836e478b4624789', //Link
-            abi: erc20ABIperso,
-            functionName: 'balanceOf',
-            args: [address],
-        },
-        {
-            address: '0x88541670E55cC00bEEFD87eB59EDd1b7C511AC9a', //AAVE
-            abi: erc20ABIperso,
-            functionName: 'balanceOf',
-            args: [address],
-        },
-        //////////////////// BNB ////////////////////
-        {
-            address: '0x6397de0F9aEDc0F7A8Fa8B438DDE883B9c201010', //SIN
-            abi: erc20ABIperso,
-            functionName: 'balanceOf',
-            args: [address],
-        },
-        // Add more contracts as needed
-        //////////////////// FUJI ////////////////////
-        //////////////////// Mainnet ETH //////////////////// (Need to list all the erc20 tokens)
-        //////////////////// Other Mainnet //////////////////// (Also need to list for all the erc20 tokens in the other mainet)
-    ] as const; //Erase 'as const;' if some error because know it's immutable and with address ... (I will just have a warning on contracts below but it's not a problem)
+interface Contract {
+    address: string;
+    abi: any;
+    functionName: string;
+    args: string[];
+}
+
+interface TokenInfo {
+    [address: string]: {
+        name: string;
+        symbol: string;
+        decimals: number;
+        logoURI: string;
+    };
+}
+
+export function GetAccountBalance() {
+    const { address } = useAccount();
+    const [contracts, setContracts] = useState<Contract[]>([]);
+    const [tokenInfo, setTokenInfo] = useState<TokenInfo>({});
+
+    useEffect(() => {
+        if (address) {
+            const newContracts: Contract[] = [];
+            const newTokenInfo: TokenInfo = {};
+
+            tokenList.tokens.forEach((token: Token) => {
+                newContracts.push({
+                    address: token.address,
+                    abi: erc20ABIperso,
+                    functionName: 'balanceOf',
+                    args: [address],
+                });
+
+                newTokenInfo[token.address] = {
+                    name: token.name,
+                    symbol: token.symbol,
+                    decimals: token.decimals,
+                    logoURI: token.logoURI,
+                };
+            });
+
+            setContracts(newContracts);
+            setTokenInfo(newTokenInfo);
+        }
+    }, [address]); //Chaque fois que l'addresse change, on met à jour les contracts et les tokenInfo (Vaut mieux le faire avec un boutton pour éviter de faire trop de requêtes)
 
     const { data, error, isLoading } = useContractReads({
-        contracts: contracts,
-    })
-    if (error) return <div>Error fetching balances</div>;
-    if (isLoading) return <div>Loading balances...</div>;
-
-    /// POUR AVOIR TOUTES LES DECIMALES DU TOKEN ... ///
-    const formattedBalances = data?.map((item, index) => {
-        if (!item || !item.result) return { balance: '0', tokenName: 'Unknown' };
-        let balance = '0';
-        balance = formatUnits(item.result, 18);
-        const tokenAddress = contracts[index].address;
-        const tokenName = tokenMapping[tokenAddress] || 'Unknown Token';
-
-        return { balance, tokenName };
+        contracts,
     });
+    //console.log(data);
 
-    //I don't want to display the balance if it's equal to 0
-    const nonZeroBalances = (formattedBalances || []).filter(
-        ({ balance }) => parseFloat(balance) > 0
-    );
+    const formattedBalances = data?.reduce((acc, item, index) => {
+        if (item.status === 'success' && item.result) {
+            const tokenAddress = contracts[index].address;
+            const tokenDecimals = tokenInfo[tokenAddress]?.decimals || 18;
+            const balance = formatUnits(item.result, tokenDecimals);
+
+            acc.push({
+                balance,
+                tokenName: tokenInfo[tokenAddress]?.name || 'Unknown Token',
+                symbol: tokenInfo[tokenAddress]?.symbol || '',
+                logoURI: tokenInfo[tokenAddress]?.logoURI || '/images/default-icon.svg',
+            });
+        }
+        return acc;
+    }, [] as Array<{ balance: string; tokenName: string; symbol: string; logoURI: string; }>) || [];
+    //console.log(formattedBalances);
 
     return (
         <div className="mt-4 mx-auto w-3/4 bg-white shadow-lg rounded-lg p-6">
@@ -90,20 +105,18 @@ export function GetAccountBalance() {
                         </tr>
                     </thead>
                     <tbody>
-                        {/* Display the chain balance first */}
                         <tr className="border-b">
                             <GetChainBalance />
                         </tr>
-                        {nonZeroBalances && nonZeroBalances.map(({ balance, tokenName }, index) => (
+                        {formattedBalances.map(({ balance, tokenName, symbol, logoURI }, index) => (
                             <tr key={index} className="border-b">
                                 <td className="py-4">
                                     <div className="flex items-center">
-                                        {/* Replace `placeholder-icon.svg` with your actual icon paths */}
-                                        <img className="h-6 w-6 rounded-full mr-2" src={getTokenIconPath(tokenName)} alt={tokenName} />
-                                        <span>{tokenName}</span>
+                                        <img className="h-6 w-6 rounded-full mr-2" src={logoURI} alt={tokenName} />
+                                        <span>{tokenName} ({symbol})</span>
                                     </div>
                                 </td>
-                                <td className="py-4">{balance} {tokenName}</td>
+                                <td className="py-4">{balance} {symbol}</td>
                             </tr>
                         ))}
                     </tbody>
