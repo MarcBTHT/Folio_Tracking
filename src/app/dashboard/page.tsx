@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Dashboard1 } from './components/dashboard'
+import { Dashboard } from './components/dashboard'
 import { Connect } from '../../components/Connect'
 import { Connected } from '../../components/Connected'
 import { NetworkSwitcher } from '../../components/NetworkSwitcher'
@@ -14,7 +14,7 @@ export default function Page() {
         <h2 className="flex justify-center text-xl font-bold my-2 text-customRed" >Network</h2>
         <NetworkSwitcher />
         <br />
-        <Dashboard1 />
+        <Dashboard />
       </Connected>
       <nav className="flex justify-center p-4">
         <Link href="/" className="text-center underline">

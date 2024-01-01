@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import { useAccount, useBalance, useContractReads, useNetwork } from 'wagmi'
 import { erc20ABIperso } from './constants';
+import { formatUnits } from 'viem'
 
-export function Dashboard1() {
+export function Dashboard() {
     return (
         <>
             <div className='text-center'>
@@ -65,18 +66,8 @@ export function GetAccountBalance() {
     /// POUR AVOIR TOUTES LES DECIMALES DU TOKEN ... ///
     const formattedBalances = data?.map((item, index) => {
         if (!item || !item.result) return { balance: '0', tokenName: 'Unknown' };
-
-        const rawBalance = item.result.toString();
-        const decimals = 18; // Adjust based on each token's decimals
         let balance = '0';
-        const balanceLength = rawBalance.length;
-
-        if (balanceLength > decimals) {
-            balance = rawBalance.slice(0, -decimals) + '.' + rawBalance.slice(-decimals);
-        } else {
-            balance = '0.' + rawBalance.padStart(decimals, '0');
-        }
-
+        balance = formatUnits(item.result, 18);
         const tokenAddress = contracts[index].address;
         const tokenName = tokenMapping[tokenAddress] || 'Unknown Token';
 
@@ -123,7 +114,7 @@ export function GetAccountBalance() {
 }
 
 export function GetChainBalance() { //I can put this function in GetAccountBalance (I just wait to see how I will handle the rest)
-    const { chain } = useNetwork()
+    const { chain } = useNetwork()  //Ca utilise un getBalance et un formatEther ... https://viem.sh/docs/actions/public/getBalance.html#returns
     const { address } = useAccount()
     const { data, refetch } = useBalance({
         address,
