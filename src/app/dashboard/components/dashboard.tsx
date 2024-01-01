@@ -176,5 +176,5 @@ function getTokenIconPath(tokenName: string): string {
         'BNB Smart Chain': "/images/bnb-bnb-logo.png",
         // ... other token mappings
     };
-    return tokenIconMapping[tokenName] || '../assets/default-icon.svg'; // Fallback to a default icon
+    return tokenIconMapping[tokenName] || '/images/Ethereum_logo.png'; // Fallback to a default icon
 }
