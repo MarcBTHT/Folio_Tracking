@@ -6,6 +6,7 @@ import { erc20ABIperso } from './constants';
 import { formatUnits } from 'viem'
 
 import tokenList from './tokenList.json';
+import { config } from '../../../wagmi';
 
 export function Dashboard() {
     return (
@@ -17,82 +18,51 @@ export function Dashboard() {
     )
 }
 
-interface Token {
-    address: string;
-    name: string;
-    symbol: string;
-    decimals: number;
-    logoURI: string;
-}
-
-interface Contract {
-    address: string;
-    abi: any;
-    functionName: string;
-    args: string[];
-}
-
 interface TokenInfo {
     [address: string]: {
         name: string;
         symbol: string;
         decimals: number;
         logoURI: string;
+        balance: string;
     };
 }
 
 export function GetAccountBalance() {
     const { address } = useAccount();
-    const [contracts, setContracts] = useState<Contract[]>([]);
     const [tokenInfo, setTokenInfo] = useState<TokenInfo>({});
 
     useEffect(() => {
-        if (address) {
-            const newContracts: Contract[] = [];
-            const newTokenInfo: TokenInfo = {};
+        async function fetchBalances() {
+            if (address) {
+                const newTokenInfo: TokenInfo = {};
 
-            tokenList.tokens.forEach((token: Token) => {
-                newContracts.push({
-                    address: token.address,
-                    abi: erc20ABIperso,
-                    functionName: 'balanceOf',
-                    args: [address],
-                });
+                for (const token of tokenList.tokens) {
+                    try {
+                        const data = await config.publicClient.readContract({
+                            address: token.address,
+                            abi: erc20ABIperso,
+                            functionName: 'balanceOf',
+                            args: [address]
+                        });
 
-                newTokenInfo[token.address] = {
-                    name: token.name,
-                    symbol: token.symbol,
-                    decimals: token.decimals,
-                    logoURI: token.logoURI,
-                };
-            });
+                        const balance = data && formatUnits(data, token.decimals);
 
-            setContracts(newContracts);
-            setTokenInfo(newTokenInfo);
+                        newTokenInfo[token.address] = {
+                            name: token.name,
+                            symbol: token.symbol,
+                            decimals: token.decimals,
+                            logoURI: token.logoURI,
+                            balance: balance || '0'
+                        };
+
+                    } catch (error) {}
+                }
+                setTokenInfo(newTokenInfo);
+            }
         }
-    }, [address]); //Chaque fois que l'addresse change, on met à jour les contracts et les tokenInfo (Vaut mieux le faire avec un boutton pour éviter de faire trop de requêtes)
-
-    const { data, error, isLoading } = useContractReads({
-        contracts,
-    });
-    //console.log(data);
-
-    const formattedBalances = data?.reduce((acc, item, index) => {
-        if (item.status === 'success' && item.result) {
-            const tokenAddress = contracts[index].address;
-            const tokenDecimals = tokenInfo[tokenAddress]?.decimals || 18;
-            const balance = formatUnits(item.result, tokenDecimals);
-
-            acc.push({
-                balance,
-                tokenName: tokenInfo[tokenAddress]?.name || 'Unknown Token',
-                symbol: tokenInfo[tokenAddress]?.symbol || '',
-                logoURI: tokenInfo[tokenAddress]?.logoURI || '/images/default-icon.svg',
-            });
-        }
-        return acc;
-    }, [] as Array<{ balance: string; tokenName: string; symbol: string; logoURI: string; }>) || [];
-    //console.log(formattedBalances);
+        fetchBalances();
+    }, [address]);
 
     return (
         <div className="mt-4 mx-auto w-3/4 bg-white shadow-lg rounded-lg p-6">
@@ -108,12 +78,12 @@ export function GetAccountBalance() {
                         <tr className="border-b">
                             <GetChainBalance />
                         </tr>
-                        {formattedBalances.map(({ balance, tokenName, symbol, logoURI }, index) => (
-                            <tr key={index} className="border-b">
+                        {Object.entries(tokenInfo).map(([address, { balance, name, symbol, logoURI }]) => (
+                            <tr key={address} className="border-b">
                                 <td className="py-4">
                                     <div className="flex items-center">
-                                        <img className="h-6 w-6 rounded-full mr-2" src={logoURI} alt={tokenName} />
-                                        <span>{tokenName} ({symbol})</span>
+                                        <img className="h-6 w-6 rounded-full mr-2" src={logoURI} alt={name} />
+                                        <span>{name} ({symbol})</span>
                                     </div>
                                 </td>
                                 <td className="py-4">{balance} {symbol}</td>
@@ -124,6 +94,7 @@ export function GetAccountBalance() {
             </div>
         </div>
     );
+    
 }
 
 export function GetChainBalance() { //I can put this function in GetAccountBalance (I just wait to see how I will handle the rest)
@@ -137,7 +108,6 @@ export function GetChainBalance() { //I can put this function in GetAccountBalan
         <>
             <td className="py-4">
                 <div className="flex items-center">
-                    {/* Replace `placeholder-icon.svg` with your actual icon paths */}
                     <img className="h-6 w-6 rounded-full mr-2" src={getTokenIconPath(chain?.name || '')} alt={chain?.name || 'Default Chain'} />
                     <span>{chain?.name}</span>
                 </div>
