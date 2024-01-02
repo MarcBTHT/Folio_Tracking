@@ -36,32 +36,34 @@ export function GetAccountBalance() {
     const [tokenInfo, setTokenInfo] = useState<TokenInfo>({});
     const [isSyncing, setIsSyncing] = useState(false);
 
+    const publicClient = config.publicClient; //Initialize only once for efficiency
+
     const fetchBalances = async (address?: `0x${string}`) => {
         if (address) {
-            const newTokenInfo: TokenInfo = {};
-
-            for (const token of tokenList.tokens) {
-                try {
-                    const data = await config.publicClient.readContract({
-                        address: token.address,
-                        abi: erc20ABIperso,
-                        functionName: 'balanceOf',
-                        args: [address]
-                    });
-
+            const balancePromises = tokenList.tokens.map(token => {
+                return publicClient.readContract({
+                    address: token.address,
+                    abi: erc20ABIperso,
+                    functionName: 'balanceOf',
+                    args: [address]
+                }).then(data => {
                     const balance = data && formatUnits(data, token.decimals);
-                    
                     if (balance && balance != '0') {
-                        newTokenInfo[token.address] = {
-                            name: token.name,
-                            symbol: token.symbol,
-                            decimals: token.decimals,
-                            logoURI: token.logoURI,
-                            balance: balance || '0'
+                        return {
+                            [token.address]: {
+                                name: token.name,
+                                symbol: token.symbol,
+                                decimals: token.decimals,
+                                logoURI: token.logoURI,
+                                balance: balance || '0'
+                            }
                         };
                     }
-                } catch (error) { }
-            }
+                }).catch(error => {});
+            });
+    
+            const balances = await Promise.all(balancePromises);
+            const newTokenInfo = balances.reduce((acc, balance) => ({ ...acc, ...balance }), {});
             setTokenInfo(newTokenInfo);
             setIsSyncing(false);
         }
