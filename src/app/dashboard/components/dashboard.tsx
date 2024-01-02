@@ -70,7 +70,12 @@ export function GetAccountBalance() {
     }
 
     useEffect(() => {
-        fetchBalances(connectedAddress);
+        if (connectedAddress) {
+            setIsSyncing(true); // Déclencher le chargement
+            fetchBalances(connectedAddress as `0x${string}`).finally(() => {
+                setIsSyncing(false); // Arrêter le chargement une fois terminé
+            });
+        }
     }, [connectedAddress]);
 
     const handleSyncClick = () => {
@@ -88,7 +93,10 @@ export function GetAccountBalance() {
 
     const handleFetchBalances = () => {
         if (inputAddress) {
-            fetchBalances(inputAddress as `0x${string}`);
+            setIsSyncing(true); // Déclencher le chargement
+            fetchBalances(inputAddress as `0x${string}`).finally(() => {
+                setIsSyncing(false); // Arrêter le chargement une fois terminé
+            });
         }
     };
 
